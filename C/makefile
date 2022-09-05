@@ -6,10 +6,10 @@ CC = gcc
 CFLAGS = -Wall -I$(IDIR)
 LFLAGS = -lm
 
-_INCF = args.h
+_INCF = args.h aes.h
 INCF  = $(patsubst %,$(IDIR)/%,$(_INCF))
 
-_OBJF = args.o aes.o
+_OBJF = args.o aes.o main.o
 OBJF  = $(patsubst %,$(ODIR)/%,$(_OBJF))
 
 start: $(ODIR) aes256	
