@@ -63,13 +63,14 @@ void mix_column(uint8_t *col);
 void rmix_column(uint8_t *col);
 void mix_columns(uint8_t *state);
 void rmix_columns(uint8_t *state);
-
+void add_round_key(uint8_t *state, uint8_t *round_key);
 /*
 ** Implementing public functions
 */
 aes_t init_aes(uint8_t *key) {
 	aes_t keys;
 	
+	keys.key = key;
 	keys.length = 10;
 	keys.round_keys = expand_key(key, keys.length);
 	
@@ -80,15 +81,23 @@ void clear_aes(aes_t keys) {
 	free(keys.round_keys);
 }
 
-void encrypt(aes_t keys, FILE *input, char *out_path) {
+void encrypt_block(aes_t keys, uint8_t *state) {
+	int i;
+	add_round_key(state, keys.key);
 	
+	for(i = 0; i < keys.length - 1; i++) {
+		sub_bytes(state, 16);
+		shift_rows(state);
+		mix_columns(state);
+		add_round_key(state, keys.round_keys + 16 * i);
+	}
+	
+	sub_bytes(state, 16);
+	shift_rows(state);
+	add_round_key(state, keys.round_keys + 16 * i);
 }
 
-void decrypt(aes_t keys, FILE *input, char *out_path) {
-	
-}
-
-void hash(aes_t keys, FILE *input) {
+void decrypt_block(aes_t keys, uint8_t *state) {
 	
 }
 
@@ -153,7 +162,7 @@ void shift_row(uint8_t *state, int row_n, int offset) {
 	uint8_t new_row[4];
 	int i;
 	for(i = 0; i < 4; ++i) {
-		new_row[i] =  state[4 * (i + offset % 4) + row_n];
+		new_row[i] =  state[4 * ((i + offset) % 4) + row_n];
 	}
 	for(i = 0; i < 4; ++i) {
 		state[4 * i + row_n] = new_row[i];
@@ -217,5 +226,12 @@ void rmix_columns(uint8_t *state) {
 	for(i = 0; i < 4; ++i) {
 		rmix_column(state + (4 * i));
 		mix_column(state + (4 * i));
+	}
+}
+
+void add_round_key(uint8_t *state, uint8_t *round_key) {
+	int i;
+	for(i = 0; i < 16; ++i) {
+		state[i] ^= round_key[i];
 	}
 }

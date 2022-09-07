@@ -5,6 +5,7 @@
 #include <stdio.h>
 
 typedef struct {
+	uint8_t *key;
 	uint8_t *round_keys;
 	uint8_t length;
 } aes_t;
@@ -12,8 +13,7 @@ typedef struct {
 aes_t init_aes(uint8_t *key);
 void clear_aes(aes_t keys);
 
-void encrypt(aes_t keys, FILE *input, char *out_path);
-void decrypt(aes_t keys, FILE *input, char *out_path);
-void hash(aes_t keys, FILE *input);
+void encrypt_block(aes_t keys, uint8_t *state);
+void decrypt_block(aes_t keys, uint8_t *state);
 
 #endif
