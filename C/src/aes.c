@@ -56,9 +56,13 @@ uint8_t *expand_key(uint8_t *key, uint8_t length);
 void gen_key(uint8_t *current, uint8_t *previous, int rcon_n);
 void sub_bytes(uint8_t *bytes, int length);
 void rsub_bytes(uint8_t *bytes, int length);
-void shift_row(uint8_t *state, int offset);
+void shift_row(uint8_t *state, int row_n, int offset);
 void shift_rows(uint8_t *state);
-
+uint8_t xtime(uint8_t n);
+void mix_column(uint8_t *col);
+void rmix_column(uint8_t *col);
+void mix_columns(uint8_t *state);
+void rmix_columns(uint8_t *state);
 
 /*
 ** Implementing public functions
@@ -167,5 +171,51 @@ void rshift_rows(uint8_t *state) {
 	int i;
 	for(i = 1; i < 4; ++i) {
 		shift_row(state, i, 4 - i);
+	}
+}
+
+/*
+** Basically, if upon multiplication with 2 it overflows, then xor it with a constant 
+*/
+uint8_t xtime(uint8_t n) {
+	if(n & 0x80) {
+		return (n << 1) ^ 0x1B;
+	}
+	return (n << 1);
+}
+
+/*
+** All the mix column part is thanks to  The Design of Rijndael Sex 4.1
+*/
+void mix_column(uint8_t *col) {
+	uint8_t t = col[0] ^ col[1] ^ col[2] ^ col[3];
+    uint8_t u = col[0];
+    col[0] ^= t ^ xtime(col[0] ^ col[1]);
+    col[1] ^= t ^ xtime(col[1] ^ col[2]);
+    col[2] ^= t ^ xtime(col[2] ^ col[3]);
+    col[3] ^= t ^ xtime(col[3] ^ u);
+}
+
+void rmix_column(uint8_t *col) {
+	uint8_t u = xtime(xtime(col[0] ^ col[2]));
+	uint8_t v = xtime(xtime(col[1] ^ col[3]));
+	col[0] = col[0] ^ u;
+	col[1] = col[1] ^ v;
+	col[2] = col[2] ^ u;
+	col[3] = col[3] ^ v;
+}
+
+void mix_columns(uint8_t *state) {
+	int i;
+	for(i = 0; i < 4; ++i) {
+		mix_column(state + (4 * i));
+	}
+}
+
+void rmix_columns(uint8_t *state) {
+	int i;
+	for(i = 0; i < 4; ++i) {
+		rmix_column(state + (4 * i));
+		mix_column(state + (4 * i));
 	}
 }
