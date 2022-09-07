@@ -56,6 +56,8 @@ uint8_t *expand_key(uint8_t *key, uint8_t length);
 void gen_key(uint8_t *current, uint8_t *previous, int rcon_n);
 void sub_bytes(uint8_t *bytes, int length);
 void rsub_bytes(uint8_t *bytes, int length);
+void shift_row(uint8_t *state, int offset);
+void shift_rows(uint8_t *state);
 
 
 /*
@@ -140,5 +142,30 @@ void rsub_bytes(uint8_t *bytes, int length) {
 	int i;
 	for(i = 0; i < length; i++) {
 		bytes[i] = rsbox[bytes[i]];
+	}
+}
+
+void shift_row(uint8_t *state, int row_n, int offset) {
+	uint8_t new_row[4];
+	int i;
+	for(i = 0; i < 4; ++i) {
+		new_row[i] =  state[4 * (i + offset % 4) + row_n];
+	}
+	for(i = 0; i < 4; ++i) {
+		state[4 * i + row_n] = new_row[i];
+	}
+}
+
+void shift_rows(uint8_t *state) {
+	int i;
+	for(i = 1; i < 4; ++i) {
+		shift_row(state, i, i);
+	}
+}
+
+void rshift_rows(uint8_t *state) {
+	int i;
+	for(i = 1; i < 4; ++i) {
+		shift_row(state, i, 4 - i);
 	}
 }
