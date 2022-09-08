@@ -26,6 +26,8 @@ int main(int argc, char *argv[]){
 	aes_t keys = init_aes(key);
 	encrypt_block(keys, state);
 	print_matrix(state);
+	decrypt_block(keys, state);
+	print_matrix(state);
 	clear_aes(keys);
 
     return 0;

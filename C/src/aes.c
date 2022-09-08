@@ -58,6 +58,7 @@ void sub_bytes(uint8_t *bytes, int length);
 void rsub_bytes(uint8_t *bytes, int length);
 void shift_row(uint8_t *state, int row_n, int offset);
 void shift_rows(uint8_t *state);
+void rshift_rows(uint8_t *state);
 uint8_t xtime(uint8_t n);
 void mix_column(uint8_t *col);
 void rmix_column(uint8_t *col);
@@ -98,7 +99,20 @@ void encrypt_block(aes_t keys, uint8_t *state) {
 }
 
 void decrypt_block(aes_t keys, uint8_t *state) {
+	int i = keys.length - 1;
 	
+	add_round_key(state, keys.round_keys + 16 * i);
+	rshift_rows(state);
+	rsub_bytes(state, 16);
+	
+	for(--i; i >= 0; --i) {
+		add_round_key(state, keys.round_keys + 16 * i);
+		rmix_columns(state);
+		rshift_rows(state);
+		rsub_bytes(state, 16);
+	}
+	
+	add_round_key(state, keys.key);
 }
 
 /*
