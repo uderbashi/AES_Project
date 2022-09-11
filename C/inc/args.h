@@ -5,7 +5,7 @@
 #include <argp.h>
 
 /* Used by main to communicate with parse_opt. */
-typedef struct arguments{
+typedef struct{
 	int encrypt;
 	int decrypt;
 	int hash;

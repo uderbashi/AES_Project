@@ -12,16 +12,16 @@ INCF  = $(patsubst %,$(IDIR)/%,$(_INCF))
 _OBJF = args.o aes.o main.o
 OBJF  = $(patsubst %,$(ODIR)/%,$(_OBJF))
 
-start: $(ODIR) aes256	
+start: $(ODIR) aes128
 
 $(ODIR):
 	mkdir $(ODIR)
 	
-aes256: $(OBJF)
+aes128: $(OBJF)
 	gcc -o $@ $^ $(LFLAGS)
 	
 $(ODIR)/%.o: $(SDIR)/%.c $(INCF)
 	$(CC) -c -o $@ $< $(CFLAGS)
 	
 clean:
-	rm -rf $(ODIR) aes256
+	rm -rf $(ODIR) aes128

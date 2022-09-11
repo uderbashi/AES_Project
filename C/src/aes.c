@@ -71,8 +71,7 @@ void add_round_key(uint8_t *state, uint8_t *round_key);
 aes_t init_aes(uint8_t *key) {
 	aes_t keys;
 	
-	keys.key = key;
-	keys.length = 10;
+	keys.length = 11;
 	keys.round_keys = expand_key(key, keys.length);
 	
 	return keys;
@@ -84,9 +83,9 @@ void clear_aes(aes_t keys) {
 
 void encrypt_block(aes_t keys, uint8_t *state) {
 	int i;
-	add_round_key(state, keys.key);
+	add_round_key(state, keys.round_keys);
 	
-	for(i = 0; i < keys.length - 1; i++) {
+	for(i = 1; i < keys.length - 1; i++) {
 		sub_bytes(state, 16);
 		shift_rows(state);
 		mix_columns(state);
@@ -105,14 +104,21 @@ void decrypt_block(aes_t keys, uint8_t *state) {
 	rshift_rows(state);
 	rsub_bytes(state, 16);
 	
-	for(--i; i >= 0; --i) {
+	for(--i; i > 0; --i) {
 		add_round_key(state, keys.round_keys + 16 * i);
 		rmix_columns(state);
 		rshift_rows(state);
 		rsub_bytes(state, 16);
 	}
 	
-	add_round_key(state, keys.key);
+	add_round_key(state, keys.round_keys);
+}
+
+void xor_matrix(uint8_t *m1, uint8_t *m2) {
+	int i;
+	for(i = 0; i < 16; ++i) {
+		m1[i] ^= m2[i];
+	}
 }
 
 /*
@@ -124,9 +130,13 @@ uint8_t *expand_key(uint8_t *key, uint8_t length) {
 	size_t key_size = sizeof(uint8_t) * 16;
 	uint8_t *keys = (uint8_t *)malloc(key_size * length);
 	
-	gen_key(keys, key, 0);
+	// copy the original key
+	for(i = 0; i < 16; i++) {
+		keys[i] = key[i];
+	}
+	
 	for(i = 1; i < length; ++i) {
-		gen_key(keys + key_size * i, keys + key_size * (i-1), i);
+		gen_key(keys + key_size * i, keys + key_size * (i-1), i-1);
 	}
 	
 	return keys;
@@ -244,8 +254,5 @@ void rmix_columns(uint8_t *state) {
 }
 
 void add_round_key(uint8_t *state, uint8_t *round_key) {
-	int i;
-	for(i = 0; i < 16; ++i) {
-		state[i] ^= round_key[i];
-	}
+	xor_matrix(state, round_key);
 }

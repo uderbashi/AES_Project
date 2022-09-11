@@ -1,7 +1,7 @@
 #include "args.h"
 
 /* Argp constants */
-const char *argp_program_version = "aes256 V1.0";
+const char *argp_program_version = "aes128 V1.0";
 const char *argp_program_bug_address = "<usama@derbashi.com>";
 
 /* Parse a single option. */
@@ -51,7 +51,7 @@ arguments_t argument_parser(int argc, char **argv) {
 
 	/* Program documentation. */
 	static char doc[] =
-	"This is a 256-bit AES encryptor, decryptor, and hasher\n\
+	"This is a 128-bit AES encryptor, decryptor, and hasher\n\
 Lets see where it goes\v and lets see where this one comes";
 
 	/* A description of the arguments we accept. */
