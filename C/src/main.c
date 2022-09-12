@@ -58,7 +58,24 @@ io_t get_io(arguments_t arguments) {
 		exit(-1);
 	}
 	
-	if(!arguments.hash) {
+	if(arguments.hash) { // for hashing I am using pi digits as key
+		io.key[0] = 0x31;
+		io.key[1] = 0x41;
+		io.key[2] = 0x59;
+		io.key[3] = 0x26;
+		io.key[4] = 0x53;
+		io.key[5] = 0x58;
+		io.key[6] = 0x97;
+		io.key[7] = 0x93;
+		io.key[8] = 0x23;
+		io.key[9] = 0x84;
+		io.key[10] = 0x62;
+		io.key[11] = 0x64;
+		io.key[12] = 0x33;
+		io.key[13] = 0x83;
+		io.key[14] = 0x27;
+		io.key[15] = 0x95;
+	} else {
 		io.output = fopen(arguments.output, "w+");
 		if(io.output == NULL) {
 			printf("Error opening output file!\n");
@@ -99,12 +116,16 @@ void clear_io(io_t io, arguments_t arguments) {
 }
 
 void encrypt(io_t io) {
+	int i;
 	uint8_t state[16];
 	aes_t keys = init_aes(io.key);
 	
-	while(read_block(io, state)) {
+	while((i = read_block(io, state))) {
 		encrypt_block(keys, state);
 		fwrite(state, sizeof(uint8_t), 16, io.output);
+		if (i == 2) { // in case the -1 padding was done
+			break;
+		}
 	}
 	clear_aes(keys);
 }
@@ -121,6 +142,7 @@ void decrypt(io_t io) {
 			clear_aes(keys);
 			return;
 		}
+		
 		decrypt_block(keys, state);
 		
 		if(i+2 < blocks) {
@@ -162,9 +184,12 @@ void hash(io_t io) {
 		hash[i] = 0;
 	}
 	
-	while(read_block(io, state)) {
+	while((i = read_block(io, state))) {
 		encrypt_block(keys, state);
 		xor_matrix(hash, state);
+		if (i == 2) { // in case the -1 padding was done
+			break;
+		}
 	}
 	
 	for(i = 0; i < 16; i++) {
@@ -192,11 +217,13 @@ int read_block(io_t io, uint8_t *state) {
 		state[read] = 0;
 		return 1;
 	} else if(read == 0 && io.file_size % 16 == 15) {
+		// special case if there is only one padded byte, we extend it extra block
+		// the return 2 gives a hint that it needs exension by one
 		for(; read < 15; ++read) {
 			state[read] = 0;
 		}
 		state[read] = 17;
-		return 1;
+		return 2;
 	} else {
 		return 0;
 	}
@@ -205,9 +232,8 @@ int read_block(io_t io, uint8_t *state) {
 // returns 1 if all the num last digits are 0 else returns 0
 int all_zeroes(uint8_t *state, int num) {
 	int i;
-	
 	for(i = 16-num; i < 15; i++) {
-		if (i != 0) {
+		if (state[i] != 0) {
 			return 0;
 		}
 	}
