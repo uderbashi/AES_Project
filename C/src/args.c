@@ -51,11 +51,13 @@ arguments_t argument_parser(int argc, char **argv) {
 
 	/* Program documentation. */
 	static char doc[] =
-	"This is a 128-bit AES encryptor, decryptor, and hasher\n\
-Lets see where it goes\v and lets see where this one comes";
+	"This is a 128-bit AES encryptor, decryptor, and hasher implemented in C.\n\
+This is a part of the AES-Project I created aimed to test the waters with programming languages I want to try, but didn't have any excuse to do so.\n\
+";
+//\v and lets see where this one comes";
 
 	/* A description of the arguments we accept. */
-	static char args_doc[] = "[KEY-_OPTIONS...] [IO-OPTIONS...]";
+	static char args_doc[] = "[KEY-OPTIONS...] [IO-OPTIONS...]";
 
 	/* The options we understand. */
 	static struct argp_option options[] = {
@@ -64,11 +66,11 @@ Lets see where it goes\v and lets see where this one comes";
 		{"decrypt", 'd', 0, 0, "Decrypt the given file into the output using the key"},
 		{"hash", 'h', 0, 0, "Hash the given file and output it to the screen (uses pi as a key)"},
 
-		{0,0,0,0, "One of the following key-options should be selected on encryption or decryption:"},
+		{0,0,0,0, "One of the following KEY-OPTIONS should be selected on encryption or decryption:"},
 		{"key", 'k', "STRING", 0, "Key given in the terminal"},
 		{"file-key", 'f', "FILE", 0, "Key is given as a file"},
 
-		{0,0,0,0, "IO-options:"},
+		{0,0,0,0, "IO-OPTIONS:"},
 		{"input", 'i', "FILE", 0, "The input file's path, madatory for every operation"},
 		{"output", 'o', "FILE", 0, "The output file path's, mandatory for encryption and decryption"},
 
