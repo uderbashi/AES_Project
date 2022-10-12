@@ -61,17 +61,17 @@ This is a part of the AES-Project I created aimed to test the waters with progra
 
 	/* The options we understand. */
 	static struct argp_option options[] = {
-		{0,0,0,0, "One of the following operation-options should be selcted:"},
-		{"encrypt", 'e', 0, 0, "Encrypt the given file into the output using the key"},
-		{"decrypt", 'd', 0, 0, "Decrypt the given file into the output using the key"},
-		{"hash", 'h', 0, 0, "Hash the given file and output it to the screen (uses pi as a key)"},
+		{0,0,0,0, "One of the following OPERATION-OPTIONS should be selcted:"},
+		{"encrypt", 'e', 0, 0, "Encrypt the input file into the output using the key"},
+		{"decrypt", 'd', 0, 0, "Decrypt the input file into the output using the key"},
+		{"hash", 'h', 0, 0, "Hash the input file and output it to the screen (uses pi as a key)"},
 
 		{0,0,0,0, "One of the following KEY-OPTIONS should be selected on encryption or decryption:"},
 		{"key", 'k', "STRING", 0, "Key given in the terminal"},
 		{"file-key", 'f', "FILE", 0, "Key is given as a file"},
 
 		{0,0,0,0, "IO-OPTIONS:"},
-		{"input", 'i', "FILE", 0, "The input file's path, madatory for every operation"},
+		{"input", 'i', "FILE", 0, "The input file's path, mandatory for every operation"},
 		{"output", 'o', "FILE", 0, "The output file path's, mandatory for encryption and decryption"},
 
 		{ 0 }// removes the text from being an opt
