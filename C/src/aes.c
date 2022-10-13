@@ -218,7 +218,7 @@ uint8_t xtime(uint8_t n) {
 }
 
 /*
-** All the mix column part is thanks to  The Design of Rijndael Sex 4.1
+** All the mix column part is thanks to The Design of Rijndael - Sec 4.1
 */
 void mix_column(uint8_t *col) {
 	uint8_t t = col[0] ^ col[1] ^ col[2] ^ col[3];

@@ -13,7 +13,7 @@ def parse():
 
 	parser = argparse.ArgumentParser(description=des, epilog=epi, add_help=False)
 
-	o_group = parser.add_argument_group('One of the following OPERATION-OPTIONS should be selcted:')
+	o_group = parser.add_argument_group('One of the following OPERATION-OPTIONS should be selected:')
 	o_mutex = o_group.add_mutually_exclusive_group(required=True)
 	o_mutex.add_argument('-e', '--encrypt', action='store_true', help="Encrypt the input file into the output using the key")
 	o_mutex.add_argument('-d', '--decrypt', action='store_true', help="Decrypt the input file into the output using the key")
