@@ -51,6 +51,9 @@ def xor_lists(m1, m2):
 	'''
 	return [x1 ^ x2 for x1, x2 in zip(m1, m2)]
 
+def add_round_key(matrix, round_key):
+	return xor_lists(matrix, round_key)
+
 def shift_row(matrix, row_n, offset):
 	'''
 	recieves an aes matrix and shifts its row_n by offset
@@ -68,13 +71,13 @@ Key generation functions
 '''
 def init_keys(key):
 	'''
-	gets a key as a string, converts it to an array of ints and expands it
+	gets a key as an uint8 array, converts it to an array of ints and expands it
 	'''
-	# convert a key into an array of ints
-	key = list(map(ord, key[:16]))
 	if len(key) < 16:
 		zeroes = [0 for i in range(16 - len(key))]
 		key += zeroes
+	elif len(key) > 16:
+		key = key[:16]
 
 	keys = [key]
 	for rcon_b in rcon:
@@ -104,13 +107,23 @@ def get_key(previous_key, rcon_b):
 '''
 Encryption functions
 '''
-def encrypt_block():
-	pass
+def encrypt_block(matrix, keys):
+	matrix = add_round_key(matrix, keys[0])
+
+	for i in range(1, len(keys) - 1):
+		matrix = sub_bytes(matrix)
+		shift_rows(matrix)
+		mix_columns(matrix)
+		matrix = add_round_key(matrix, keys[i])
+
+	matrix = sub_bytes(matrix)
+	shift_rows(matrix)
+	return add_round_key(matrix, keys[-1])
 
 def sub_bytes(matrix):
 	return [sbox[x] for x in matrix]
 
-def shift_rows(matrix)
+def shift_rows(matrix):
 	for i in range(1,4):
 		shift_row(matrix, i, i)
 
@@ -120,11 +133,11 @@ def mix_column(col):
 	'''
 	t = col[0] ^ col[1] ^ col[2] ^ col[3]
 
-    new_col = []
-    new_col.append(col[0] ^ t ^ xtime(col[0] ^ col[1]))
-    new_col.append(col[1] ^ t ^ xtime(col[1] ^ col[2]))
-    new_col.append(col[2] ^ t ^ xtime(col[2] ^ col[3]))
-    new_col.append(col[3] ^ t ^ xtime(col[3] ^ col[0]))
+	new_col = []
+	new_col.append(col[0] ^ t ^ xtime(col[0] ^ col[1]))
+	new_col.append(col[1] ^ t ^ xtime(col[1] ^ col[2]))
+	new_col.append(col[2] ^ t ^ xtime(col[2] ^ col[3]))
+	new_col.append(col[3] ^ t ^ xtime(col[3] ^ col[0]))
 
 	return new_col
 
@@ -135,13 +148,23 @@ def mix_columns(matrix):
 '''
 Decryption functions
 '''
-def decrypt_block():
-	pass
+def decrypt_block(matrix, keys):
+	matrix = add_round_key(matrix, keys[-1])
+	rshift_rows(matrix)
+	matrix = rsub_bytes(matrix)
+
+	for i in range(len(keys) - 2, 0, -1):
+		matrix = add_round_key(matrix, keys[i])
+		rmix_columns(matrix)
+		rshift_rows(matrix)
+		matrix = rsub_bytes(matrix)
+
+	return add_round_key(matrix, keys[0])
 
 def rsub_bytes(matrix):
 	return [rsbox[x] for x in matrix]
 
-def rshift_rows(matrix)
+def rshift_rows(matrix):
 	for i in range(1,4):
 		shift_row(matrix, i, 4-i)
 
@@ -158,7 +181,5 @@ def rmix_column(col):
 	return new_col
 
 def rmix_columns(matrix):
-	def mix_columns(matrix):
 	for i in range(4):
-		matrix[4*i : 4*(i+1)] = rmix_column(matrix[4*i : 4*(i+1)])
-		matrix[4*i : 4*(i+1)] = mix_column(matrix[4*i : 4*(i+1)])
+		matrix[4*i : 4*(i+1)] = mix_column(rmix_column(matrix[4*i : 4*(i+1)]))
