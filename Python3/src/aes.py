@@ -43,11 +43,25 @@ rcon = [0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1b, 0x36]
 
 '''
 Utility functions
+NOTE: an aes matrix is a 16 uint8 array
 '''
-# XORs two 4*4 matrices
 def xor_lists(m1, m2):
-	return list(x1 ^ x2 for x1, x2 in zip(m1, m2))
+	'''
+	XORs two aes matrices
+	'''
+	return [x1 ^ x2 for x1, x2 in zip(m1, m2)]
 
+def shift_row(matrix, row_n, offset):
+	'''
+	recieves an aes matrix and shifts its row_n by offset
+	'''
+	matrix[row_n], matrix[4+row_n], matrix[8+row_n], matrix[12+row_n] =\
+		matrix[4*offset+row_n], matrix[4*((1+offset)%4)+row_n], matrix[4*((2+offset)%4)+row_n], matrix[4*((3+offset)%4)+row_n]
+
+def xtime(n):
+	if n & 0x80:
+		return ((n << 1) ^ 0x1B) & 0xFF # added the &0xFF to limit it to 8bit
+	return n << 1
 
 '''
 Key generation functions
@@ -93,8 +107,30 @@ Encryption functions
 def encrypt_block():
 	pass
 
-def sub_bytes(arr):
-	return [sbox[x] for x in arr]
+def sub_bytes(matrix):
+	return [sbox[x] for x in matrix]
+
+def shift_rows(matrix)
+	for i in range(1,4):
+		shift_row(matrix, i, i)
+
+def mix_column(col):
+	'''
+	All the mix column part is thanks to The Design of Rijndael - Sec 4.1
+	'''
+	t = col[0] ^ col[1] ^ col[2] ^ col[3]
+
+    new_col = []
+    new_col.append(col[0] ^ t ^ xtime(col[0] ^ col[1]))
+    new_col.append(col[1] ^ t ^ xtime(col[1] ^ col[2]))
+    new_col.append(col[2] ^ t ^ xtime(col[2] ^ col[3]))
+    new_col.append(col[3] ^ t ^ xtime(col[3] ^ col[0]))
+
+	return new_col
+
+def mix_columns(matrix):
+	for i in range(4):
+		matrix[4*i : 4*(i+1)] = mix_column(matrix[4*i : 4*(i+1)])
 
 '''
 Decryption functions
@@ -102,5 +138,27 @@ Decryption functions
 def decrypt_block():
 	pass
 
-def rsub_bytes(arr):
-	return [rsbox[x] for x in arr]
+def rsub_bytes(matrix):
+	return [rsbox[x] for x in matrix]
+
+def rshift_rows(matrix)
+	for i in range(1,4):
+		shift_row(matrix, i, 4-i)
+
+def rmix_column(col):
+	u = xtime(xtime(col[0] ^ col[2]))
+	v = xtime(xtime(col[1] ^ col[3]))
+
+	new_col = []
+	new_col.append(col[0] ^ u)
+	new_col.append(col[1] ^ v)
+	new_col.append(col[2] ^ u)
+	new_col.append(col[3] ^ v)
+
+	return new_col
+
+def rmix_columns(matrix):
+	def mix_columns(matrix):
+	for i in range(4):
+		matrix[4*i : 4*(i+1)] = rmix_column(matrix[4*i : 4*(i+1)])
+		matrix[4*i : 4*(i+1)] = mix_column(matrix[4*i : 4*(i+1)])
