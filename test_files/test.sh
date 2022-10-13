@@ -23,10 +23,10 @@ for file in "${test_files[@]}"; do
 	# encrypt and decrypt the file
 	$exe -e -i $file -o $file_enc -f cipher128
 	$exe -d -i $file_enc -o $file_dec -f cipher128
-	
+
 	$exe -h -i $file
 	$exe -h -i $file_dec
-	
+
 
 	# Execute diff
 	$tst $file $file_dec

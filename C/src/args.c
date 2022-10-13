@@ -16,31 +16,31 @@ error_t parse_opt(int key, char *arg, struct argp_state *state) {
 		case 'd':
 			arguments->decrypt = 1;
 			break;
-			
+
 		case 'h':
 			arguments->hash = 1;
 			break;
-			
+
 		case 'k':
 			arguments->key_file = 0;
 			arguments->key = arg;
 			break;
-			
+
 		case 'f':
 			arguments->key_file = 1;
 			arguments->key = arg;
 			break;
-			
+
 		case 'i':
 			arguments->io_opt *= -1;
 			arguments->input = arg;
 			break;
-		
+
 		case 'o':
 			arguments->io_opt *= 2;
 			arguments->output = arg;
 			break;
-     
+
 		default:
 			return ARGP_ERR_UNKNOWN;
 	}
@@ -76,10 +76,10 @@ This is a part of the AES-Project I created aimed to test the waters with progra
 
 		{ 0 }// removes the text from being an opt
 	};
-	
+
 	/* Our argp parser. */
 	static struct argp argp = { options, parse_opt, args_doc, doc };
-	
+
 	arguments_t arguments;
 
 	/* Default values. */
@@ -92,22 +92,22 @@ This is a part of the AES-Project I created aimed to test the waters with progra
 	/* Parse our arguments; every option seen by parse_opt will be
 	reflected in arguments. */
 	argp_parse(&argp, argc, argv, 0, 0, &arguments);
-	
+
 	if(arguments.decrypt + arguments.encrypt + arguments.hash != 1) {
 		printf("Error: use one and only one operation option.\nUse --help for usage\n");
 		exit(-1);
 	}
-	
+
 	if(arguments.key_file == -1 && arguments.hash == 0) {
 		printf("Error: use a key or key file for encryption and decryption.\nUse --help for usage\n");
 		exit(-1);
 	}
-	
+
 	if(arguments.io_opt < 0) {
 		printf("Error: indicate the input file.\nUse --help for usage\n");
 		exit(-1);
 	}
-	
+
 	if(arguments.io_opt % 2 != 0 && arguments.hash == 0) {
 		printf("Error: indicate an output file for encryption and decryption.\nUse --help for usage\n");
 		exit(-1);

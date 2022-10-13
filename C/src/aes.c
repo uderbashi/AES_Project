@@ -22,7 +22,7 @@ static const uint8_t sbox[256] = {
 0xba, 0x78, 0x25, 0x2e, 0x1c, 0xa6, 0xb4, 0xc6, 0xe8, 0xdd, 0x74, 0x1f, 0x4b, 0xbd, 0x8b, 0x8a,
 0x70, 0x3e, 0xb5, 0x66, 0x48, 0x03, 0xf6, 0x0e, 0x61, 0x35, 0x57, 0xb9, 0x86, 0xc1, 0x1d, 0x9e,
 0xe1, 0xf8, 0x98, 0x11, 0x69, 0xd9, 0x8e, 0x94, 0x9b, 0x1e, 0x87, 0xe9, 0xce, 0x55, 0x28, 0xdf,
-0x8c, 0xa1, 0x89, 0x0d, 0xbf, 0xe6, 0x42, 0x68, 0x41, 0x99, 0x2d, 0x0f, 0xb0, 0x54, 0xbb, 0x16 
+0x8c, 0xa1, 0x89, 0x0d, 0xbf, 0xe6, 0x42, 0x68, 0x41, 0x99, 0x2d, 0x0f, 0xb0, 0x54, 0xbb, 0x16
 };
 
 static const uint8_t rsbox[256] = {
@@ -49,7 +49,7 @@ static const uint8_t rcon[10] = {
 };
 
 /*
-** Defining static functions 
+** Defining static functions
 */
 
 uint8_t *expand_key(uint8_t *key, uint8_t length);
@@ -70,10 +70,10 @@ void add_round_key(uint8_t *state, uint8_t *round_key);
 */
 aes_t init_aes(uint8_t *key) {
 	aes_t keys;
-	
+
 	keys.length = 11;
 	keys.round_keys = expand_key(key, keys.length);
-	
+
 	return keys;
 }
 
@@ -84,14 +84,14 @@ void clear_aes(aes_t keys) {
 void encrypt_block(aes_t keys, uint8_t *state) {
 	int i;
 	add_round_key(state, keys.round_keys);
-	
+
 	for(i = 1; i < keys.length - 1; i++) {
 		sub_bytes(state, 16);
 		shift_rows(state);
 		mix_columns(state);
 		add_round_key(state, keys.round_keys + 16 * i);
 	}
-	
+
 	sub_bytes(state, 16);
 	shift_rows(state);
 	add_round_key(state, keys.round_keys + 16 * i);
@@ -99,18 +99,18 @@ void encrypt_block(aes_t keys, uint8_t *state) {
 
 void decrypt_block(aes_t keys, uint8_t *state) {
 	int i = keys.length - 1;
-	
+
 	add_round_key(state, keys.round_keys + 16 * i);
 	rshift_rows(state);
 	rsub_bytes(state, 16);
-	
+
 	for(--i; i > 0; --i) {
 		add_round_key(state, keys.round_keys + 16 * i);
 		rmix_columns(state);
 		rshift_rows(state);
 		rsub_bytes(state, 16);
 	}
-	
+
 	add_round_key(state, keys.round_keys);
 }
 
@@ -129,23 +129,23 @@ uint8_t *expand_key(uint8_t *key, uint8_t length) {
 	int i;
 	size_t key_size = sizeof(uint8_t) * 16;
 	uint8_t *keys = (uint8_t *)malloc(key_size * length);
-	
+
 	// copy the original key
 	for(i = 0; i < 16; i++) {
 		keys[i] = key[i];
 	}
-	
+
 	for(i = 1; i < length; ++i) {
 		gen_key(keys + key_size * i, keys + key_size * (i-1), i-1);
 	}
-	
+
 	return keys;
 }
 
 void gen_key(uint8_t *current_key, uint8_t *previous_key, int rcon_n) {
 	uint8_t previous_word[4], early_word[4];
 	int i, j;
-	
+
 	// Apply rotation, and substitution on previous word with rcon xor
 	previous_word[0] = previous_key[13];
 	previous_word[1] = previous_key[14];
@@ -153,7 +153,7 @@ void gen_key(uint8_t *current_key, uint8_t *previous_key, int rcon_n) {
 	previous_word[3] = previous_key[12];
 	sub_bytes(previous_word, 4);
 	previous_word[0] ^= rcon[rcon_n];
-	
+
 	for(i = 0; i < 4; i++) {
 		for(j = 0; j < 4; ++j) {
 			if(i != 0) {
@@ -161,7 +161,7 @@ void gen_key(uint8_t *current_key, uint8_t *previous_key, int rcon_n) {
 			}
 			early_word[j] = previous_key[4 * i + j];
 		}
-		
+
 		for(j = 0; j < 4; ++j) {
 			current_key[4 * i + j] = previous_word[j] ^ early_word[j];
 		}
@@ -208,7 +208,7 @@ void rshift_rows(uint8_t *state) {
 }
 
 /*
-** Basically, if upon multiplication with 2 it overflows, then xor it with a constant 
+** Basically, if upon multiplication with 2 it overflows, then xor it with a constant
 */
 uint8_t xtime(uint8_t n) {
 	if(n & 0x80) {

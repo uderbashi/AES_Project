@@ -24,7 +24,7 @@ int all_zeroes(uint8_t *state, int num);
 int main(int argc, char *argv[]){
 	arguments_t arguments = argument_parser(argc, argv);
 	io_t io = get_io(arguments);
-	
+
 	if(arguments.encrypt) {
 		encrypt(io);
 	} else if(arguments.decrypt) {
@@ -32,7 +32,7 @@ int main(int argc, char *argv[]){
 	} else {
 		hash(io);
 	}
-	
+
 	clear_io(io, arguments);
     return 0;
 }
@@ -51,13 +51,13 @@ io_t get_io(arguments_t arguments) {
 	io_t io;
 	int i;
 	FILE *temp;
-	
+
 	io.input = fopen(arguments.input, "r");
 	if(io.input == NULL) {
 		printf("Error opening input file!\n");
 		exit(-1);
 	}
-	
+
 	if(arguments.hash) { // for hashing I am using pi digits as key
 		io.key[0] = 0x31;
 		io.key[1] = 0x41;
@@ -82,7 +82,7 @@ io_t get_io(arguments_t arguments) {
 			fclose(io.input);
 			exit(-1);
 		}
-		
+
 		if(arguments.key_file) {
 			temp = fopen(arguments.key, "r");
 			if(temp == NULL) {
@@ -119,7 +119,7 @@ void encrypt(io_t io) {
 	int i;
 	uint8_t state[16];
 	aes_t keys = init_aes(io.key);
-	
+
 	while((i = read_block(io, state))) {
 		encrypt_block(keys, state);
 		fwrite(state, sizeof(uint8_t), 16, io.output);
@@ -135,16 +135,16 @@ void decrypt(io_t io) {
 	int blocks = io.file_size / 16;
 	uint8_t state[16], temp;
 	aes_t keys = init_aes(io.key);
-	
+
 	for(i = 0; i < blocks; ++i) {
 		if(! read_block(io, state)) {
 			printf("Error: soemthing happened seriously wrong\n");
 			clear_aes(keys);
 			return;
 		}
-		
+
 		decrypt_block(keys, state);
-		
+
 		if(i+2 < blocks) {
 			fwrite(state, sizeof(uint8_t), 16, io.output);
 		} else if(i+2 == blocks) { // if it is the one before last block
@@ -163,7 +163,7 @@ void decrypt(io_t io) {
 					fwrite(&temp, sizeof(uint8_t), 1, io.output);
 				}
 			}
-			
+
 			if(state[15] < 16 && state[15] > 1 && all_zeroes(state, state[15])) {
 				fwrite(state, sizeof(uint8_t), 16 - state[15], io.output);
 			} else {
@@ -178,12 +178,12 @@ void hash(io_t io) {
 	int i;
 	uint8_t state[16], hash[16];
 	aes_t keys = init_aes(io.key);
-	
+
 	// make sure it is empty
 	for(i = 0; i < 16; i++) {
 		hash[i] = 0;
 	}
-	
+
 	while((i = read_block(io, state))) {
 		encrypt_block(keys, state);
 		xor_matrix(hash, state);
@@ -191,20 +191,20 @@ void hash(io_t io) {
 			break;
 		}
 	}
-	
+
 	for(i = 0; i < 16; i++) {
 		printf("%02x", hash[i]);
 	}
 	printf("\n");
-	
+
 	clear_aes(keys);
 }
 
 int read_block(io_t io, uint8_t *state) {
 	int read;
-	
+
 	read = fread(state, sizeof(uint8_t), 16, io.input);
-	
+
 	if(read == 16) {
 		return 1;
 	} else if(read != 0 && read < 15) {
