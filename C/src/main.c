@@ -213,7 +213,7 @@ int read_block(io_t io, uint8_t *state) {
 		}
 		state[read] = 16 - (io.file_size % 16);
 		return 1;
-	} else if(read != 0 && read == 15) {
+	} else if(read == 15) {
 		state[read] = 0;
 		return 1;
 	} else if(read == 0 && io.file_size % 16 == 15) {
