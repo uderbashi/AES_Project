@@ -1,0 +1,10 @@
+#! /bin/sh
+# rebuild if necessary and check exit code is 0 (build was success)
+make -s
+EC=$?
+if [ $EC -ne 0 ]; then
+	exit
+fi
+# run with args
+ARGS=$@
+make -is run ARGS="$ARGS"
