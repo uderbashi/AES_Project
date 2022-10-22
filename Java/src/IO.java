@@ -70,4 +70,42 @@ public class IO {
 		}
 
 	};
+
+	public static boolean allZeroes(byte[] block) {
+		byte pad = block[15];
+		int i = 0;
+
+		if(pad <16 && pad > 1) {
+			i = 16 - pad;
+		}
+
+		for(; i < 15; ++i) {
+			if(block[i] != 0) {
+				return false;
+			}
+		}
+
+		return true;
+	};
+
+	public static int readBlock(FileInputStream input, byte[] block) {
+		int read = 0;
+		try {
+			read = input.read(block);
+		} catch (Exception e) {
+			System.out.println("Error: Exception " + e + " caught");
+			System.exit(-1);
+		}
+
+		if(read == 15) {
+			block[15] = 0x00;
+		} else if(read < 15) {
+			for(int i = read; i < 15; ++i) {
+				block[i] = 0x00;
+			}
+			block[15] = (byte) read;
+		}
+
+		return read;
+	};
 }
