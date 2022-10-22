@@ -1,11 +1,11 @@
 import java.util.HashMap;
 
 public class AES {
-	public static void main(String cli_args[]) {
-		HashMap<String, String> args = Args.parse(cli_args);
+	public static void main(String cliArgs[]) {
+		HashMap<String, String> args = Args.parse(cliArgs);
 		System.out.println(args);
-		HashMap<String, Object> io = IO.load_io(args);
+		HashMap<String, Object> io = IO.loadIO(args);
 		System.out.println(io);
-		IO.unload_io(io);
+		IO.unloadIO(io);
 	};
 }

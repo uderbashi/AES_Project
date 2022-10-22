@@ -1,11 +1,11 @@
 import java.util.HashMap;
 
 public class Args {
-	public static HashMap<String, String> parse(String cli_args[]) {
+	public static HashMap<String, String> parse(String cliArgs[]) {
 		HashMap<String, String> args = new HashMap<String, String>();
 
-		for(int i = 0; i < cli_args.length; ++i) {
-			String current = cli_args[i];
+		for(int i = 0; i < cliArgs.length; ++i) {
+			String current = cliArgs[i];
 			try{
 				switch(current) {
 					case "-e":
@@ -26,43 +26,43 @@ public class Args {
 					case "-k":
 					case "--key":
 						i++;
-						args.put("k", cli_args[i]);
+						args.put("k", cliArgs[i]);
 						break;
 
 					case "-f":
 					case "--file-key":
 						i++;
-						args.put("f", cli_args[i]);
+						args.put("f", cliArgs[i]);
 						break;
 
 					case "-i":
 					case "--input":
 						i++;
-						args.put("i", cli_args[i]);
+						args.put("i", cliArgs[i]);
 						break;
 
 					case "-o":
 					case "--output":
 						i++;
-						args.put("o", cli_args[i]);
+						args.put("o", cliArgs[i]);
 						break;
 
 					case "-?":
 					case "--help":
-						print_help();
+						printHelp();
 						break;
 					default:
-						print_err(current + " is an unknown key");
+						printErr(current + " is an unknown key");
 				}
 			} catch (ArrayIndexOutOfBoundsException e) {
-				print_err(cli_args[i-1] + " requires an argument");
+				printErr(cliArgs[i-1] + " requires an argument");
 			}
 		}
-		validate_args(args);
+		validateArgs(args);
 		return args;
 	};
 
-	private static void print_help() {
+	private static void printHelp() {
 		String help = """
 		usage: ./aes128 [-?] OPERATION-OPTION KEY-OPTION KEY IO-OPTIONS
 
@@ -93,7 +93,7 @@ public class Args {
 		System.exit(0);
 	};
 
-	private static void print_err(String msg) {
+	private static void printErr(String msg) {
 		String help = """
 		usage: ./aes128 [-?] OPERATION-OPTION KEY-OPTION KEY IO-OPTIONS
 		Check out the help manual for more information at ./aes128 -?
@@ -104,41 +104,41 @@ public class Args {
 		System.exit(-1);
 	};
 
-	private static void validate_args(HashMap<String, String> args) {
-		int arg_opt = 1; // encrypt will be a multiple of 2, decrypt 3, and hash 5
-		arg_opt *= args.get("e") != null ? 2 : 1;
-		arg_opt *= args.get("d") != null ? 3 : 1;
-		arg_opt *= args.get("h") != null ? 5 : 1;
-		if(arg_opt == 2) {
+	private static void validateArgs(HashMap<String, String> args) {
+		int argOpt = 1; // encrypt will be a multiple of 2, decrypt 3, and hash 5
+		argOpt *= args.get("e") != null ? 2 : 1;
+		argOpt *= args.get("d") != null ? 3 : 1;
+		argOpt *= args.get("h") != null ? 5 : 1;
+		if(argOpt == 2) {
 			args.remove("e");
 			args.put("act", "e");
-		} else if(arg_opt == 3) {
+		} else if(argOpt == 3) {
 			args.remove("d");
 			args.put("act", "d");
-		} else if(arg_opt == 5) {
+		} else if(argOpt == 5) {
 			args.remove("h");
 			args.put("act", "h");
 		} else {
-			print_err("One OPERATION-OPTION should be chosen");
+			printErr("One OPERATION-OPTION should be chosen");
 		}
 
-		arg_opt = 1; // key will be a multiple of 2, and file-key 3
-		arg_opt *= args.get("k") != null ? 2 : 1;
-		arg_opt *= args.get("f") != null ? 3 : 1;
-		if(arg_opt == 2) {
+		argOpt = 1; // key will be a multiple of 2, and file-key 3
+		argOpt *= args.get("k") != null ? 2 : 1;
+		argOpt *= args.get("f") != null ? 3 : 1;
+		if(argOpt == 2) {
 			args.put("key", "k");
-		} else if(arg_opt == 3) {
+		} else if(argOpt == 3) {
 			args.put("key", "f");
 		} else if(args.get("act") != "h") {
-			print_err("One KEY-OPTIONS should be chosen");
+			printErr("One KEY-OPTIONS should be chosen");
 		}
 
 		if(args.get("i") == null) {
-			print_err("Input Missing");
+			printErr("Input Missing");
 		}
 
 		if(args.get("o") == null && args.get("act") != "h") {
-			print_err("Output missing");
+			printErr("Output missing");
 		}
 	};
 }

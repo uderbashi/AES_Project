@@ -7,11 +7,10 @@ import java.util.HashMap;
 import java.util.HexFormat;
 
 public class IO {
-	public static HashMap<String, Object> load_io(HashMap<String, String> args) {
+	public static HashMap<String, Object> loadIO(HashMap<String, String> args) {
 		HashMap<String, Object> io = new HashMap<String, Object>();
 
 		try {
-
 			io.put("input", new FileInputStream(args.get("i")));
 		} catch (FileNotFoundException e) {
 			System.out.println("Error: " + args.get("i") + " could not be opened");
@@ -34,9 +33,9 @@ public class IO {
 			byte[] key = new byte[16];
 			if(args.get("key") == "f") {
 				try {
-					FileInputStream key_reader = new FileInputStream(args.get("f"));
-					int read = key_reader.read(key);
-					key_reader.close();
+					FileInputStream keyReader = new FileInputStream(args.get("f"));
+					int read = keyReader.read(key);
+					keyReader.close();
 				} catch (FileNotFoundException e) {
 					System.out.println("Error: " + args.get("f") + " could not be opened");
 					System.exit(-1);
@@ -45,10 +44,10 @@ public class IO {
 					System.exit(-1);
 				}
 			} else {
-				String key_s = args.get("k");
-				key_s = key_s.substring(0, Math.min(key_s.length(), 16));
+				String keyS = args.get("k");
+				keyS = keyS.substring(0, Math.min(keyS.length(), 16));
 				try {
-					key = key_s.getBytes("US-ASCII");
+					key = keyS.getBytes("US-ASCII");
 				} catch (Exception e) { // US ASCI shuls be implemented according to docs, so this shouldnt be an issue
 					System.out.println("Error: Exception " + e + " caught");
 					System.exit(-1);
@@ -61,7 +60,7 @@ public class IO {
 		return io;
 	};
 
-	public static void unload_io(HashMap<String, Object> io) {
+	public static void unloadIO(HashMap<String, Object> io) {
 		try {
 			((FileInputStream) io.get("input")).close();
 			((FileOutputStream) io.get("output")).close();
