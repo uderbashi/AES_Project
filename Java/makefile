@@ -5,7 +5,7 @@ JC = javac
 CFLAGS = --source-path $(SDIR) -Xlint
 RFLAGS = -cp $(ODIR)
 
-_OBJF = AES.class Args.class IO.class
+_OBJF = AES.class AESMatrix.class Args.class IO.class
 OBJF  = $(patsubst %,$(ODIR)/%,$(_OBJF))
 
 start: $(ODIR) aes128
