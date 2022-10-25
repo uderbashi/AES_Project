@@ -2,6 +2,10 @@ import java.util.HexFormat;
 
 public class AESMatrix {
 	private byte[] matrix;
+
+	/*
+	** Constants
+	*/
 	private static final byte[] SBOX = {
 		(byte)0x63, (byte)0x7c, (byte)0x77, (byte)0x7b, (byte)0xf2, (byte)0x6b, (byte)0x6f, (byte)0xc5, (byte)0x30, (byte)0x01, (byte)0x67, (byte)0x2b, (byte)0xfe, (byte)0xd7, (byte)0xab, (byte)0x76,
 		(byte)0xca, (byte)0x82, (byte)0xc9, (byte)0x7d, (byte)0xfa, (byte)0x59, (byte)0x47, (byte)0xf0, (byte)0xad, (byte)0xd4, (byte)0xa2, (byte)0xaf, (byte)0x9c, (byte)0xa4, (byte)0x72, (byte)0xc0,
@@ -44,6 +48,10 @@ public class AESMatrix {
 		0x01, (byte)0x02, (byte)0x04, (byte)0x08, (byte)0x10, (byte)0x20, (byte)0x40, (byte)0x80, (byte)0x1b, (byte)0x36
 	};
 
+	/*
+	** Constructors and toString
+	*/
+
 	public AESMatrix() {
 		matrix = new byte[16];
 	}
@@ -62,21 +70,6 @@ public class AESMatrix {
 		System.arraycopy(old.matrix, 0, matrix, 0, 16);
 	}
 
-	private static void subByteArrWith(byte[] arr, byte[] box, int len) {
-		for(int i = 0; i < len; i++) {
-			int pos = Byte.toUnsignedInt(arr[i]);
-			arr[i] = box[pos];
-		}
-	}
-
-	public static void subByteArr(byte[] arr, int len) {
-		subByteArrWith(arr, SBOX, len);
-	}
-
-	public static void rsubByteArr(byte[] arr, int len) {
-		subByteArrWith(arr, RSBOX, len);
-	}
-
 	@Override
     public String toString() {
         String out = "\n===============\n";
@@ -93,6 +86,25 @@ public class AESMatrix {
         return out;
     }
 
+    /*
+    ** Sub bytes
+    */
+
+	private static void subByteArrWith(byte[] arr, byte[] box, int len) {
+		for(int i = 0; i < len; i++) {
+			int pos = Byte.toUnsignedInt(arr[i]);
+			arr[i] = box[pos];
+		}
+	}
+
+	public static void subByteArr(byte[] arr, int len) {
+		subByteArrWith(arr, SBOX, len);
+	}
+
+	public static void rsubByteArr(byte[] arr, int len) {
+		subByteArrWith(arr, RSBOX, len);
+	}
+
 	public void subBytes() {
 		subByteArr(matrix, 16);
 	}
@@ -101,4 +113,32 @@ public class AESMatrix {
 		rsubByteArr(matrix, 16);
 	}
 
+	/*
+	** Shift rows
+	*/
+	private void shiftRow(int rowN, int offset) {
+		byte[] newRow = new byte[4];
+
+		for(int i = 0; i < 4; ++i) {
+			newRow[i] =  matrix[4 * ((i + offset) % 4) + rowN];
+		}
+
+		for(int i = 0; i < 4; ++i) {
+			matrix[4 * i + rowN] = newRow[i];
+		}
+	}
+
+	public void shiftRows() {
+		int i;
+		for(i = 1; i < 4; ++i) {
+			shiftRow(i, i);
+		}
+	}
+
+	public void rshiftRows() {
+		int i;
+		for(i = 1; i < 4; ++i) {
+			shiftRow(i, 4 - i);
+		}
+	}
 }
