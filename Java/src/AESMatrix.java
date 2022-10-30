@@ -44,10 +44,6 @@ public class AESMatrix {
 		(byte)0x17, (byte)0x2b, (byte)0x04, (byte)0x7e, (byte)0xba, (byte)0x77, (byte)0xd6, (byte)0x26, (byte)0xe1, (byte)0x69, (byte)0x14, (byte)0x63, (byte)0x55, (byte)0x21, (byte)0x0c, (byte)0x7d
 	};
 
-	private static final byte[] RCON = {
-		0x01, (byte)0x02, (byte)0x04, (byte)0x08, (byte)0x10, (byte)0x20, (byte)0x40, (byte)0x80, (byte)0x1b, (byte)0x36
-	};
-
 	/*
 	** Constructors and toString
 	*/
@@ -86,31 +82,35 @@ public class AESMatrix {
         return out;
     }
 
+    byte get(int n) {// package visibility
+		return matrix[n];
+	}
+
     /*
     ** Sub bytes
     */
 
-	private static void subByteArrWith(byte[] arr, byte[] box, int len) {
-		for(int i = 0; i < len; i++) {
+	private static void subByteArrWith(byte[] arr, byte[] box) {
+		for(int i = 0; i < arr.length; i++) {
 			int pos = Byte.toUnsignedInt(arr[i]);
 			arr[i] = box[pos];
 		}
 	}
 
-	public static void subByteArr(byte[] arr, int len) {
-		subByteArrWith(arr, SBOX, len);
+	public static void subByteArr(byte[] arr) {
+		subByteArrWith(arr, SBOX);
 	}
 
-	public static void rsubByteArr(byte[] arr, int len) {
-		subByteArrWith(arr, RSBOX, len);
+	public static void rsubByteArr(byte[] arr) {
+		subByteArrWith(arr, RSBOX);
 	}
 
 	public void subBytes() {
-		subByteArr(matrix, 16);
+		subByteArr(matrix);
 	}
 
 	public void rsubBytes() {
-		rsubByteArr(matrix, 16);
+		rsubByteArr(matrix);
 	}
 
 	/*
