@@ -141,4 +141,72 @@ public class AESMatrix {
 			shiftRow(i, 4 - i);
 		}
 	}
+
+	/*
+	** Mix columnss (The Design of Rijndael - Sec 4.1)
+	*/
+	private byte xtime(byte n) {
+		if((n & (byte)0x80) != 0) {
+			return (byte)((n << 1) ^ 0x1B);
+		}
+		return (byte)(n << 1);
+	}
+
+	private byte xtime(int n) {
+		return xtime((byte)n);
+	}
+
+	private void mixColumn(byte[] col, int offset) {
+		byte t = (byte)(col[0 + offset] ^ col[1 + offset] ^ col[2 + offset] ^ col[3 + offset]);
+		byte u = col[0 + offset];
+		col[0 + offset] ^= t ^ xtime(col[0 + offset] ^ col[1 + offset]);
+		col[1 + offset] ^= t ^ xtime(col[1 + offset] ^ col[2 + offset]);
+		col[2 + offset] ^= t ^ xtime(col[2 + offset] ^ col[3 + offset]);
+		col[3 + offset] ^= t ^ xtime(col[3 + offset] ^ u);
+	}
+
+	private void rmixColumn(byte[] col, int offset) {
+		byte u = xtime(xtime(col[0 + offset] ^ col[2 + offset]));
+		byte v = xtime(xtime(col[1 + offset] ^ col[3 + offset]));
+		col[0 + offset] = (byte)(col[0 + offset] ^ u);
+		col[1 + offset] = (byte)(col[1 + offset] ^ v);
+		col[2 + offset] = (byte)(col[2 + offset] ^ u);
+		col[3 + offset] = (byte)(col[3 + offset] ^ v);
+	}
+
+	public void mixColumns() {
+		int i;
+		for(i = 0; i < 4; ++i) {
+			mixColumn(matrix, 4 * i);
+		}
+	}
+
+	public void rmixColumns() {
+		int i;
+		for(i = 0; i < 4; ++i) {
+			rmixColumn(matrix, 4 * i);
+			mixColumn(matrix, 4 * i);
+		}
+	}
+
+	/*
+	** XOR and util
+	*/
+	public void xorMatrix(byte[] other) {
+		if(other.length != 16) {
+			System.err.println("ERROR: Matrix length incompatible, matrix doesnt xor");
+			return;
+		}
+		for(int i = 0; i < 16; i++) {
+			matrix[i] ^= other[i];
+		}
+	}
+
+	public void xorMatrix(AESMatrix other) {
+		xorMatrix(other.matrix);
+	}
+
+	public void addRoundKey(AESMatrix roundKey) {
+		xorMatrix(roundKey);
+	}
 }
