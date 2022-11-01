@@ -1,3 +1,5 @@
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.HexFormat;
 
 public class AESMatrix {
@@ -82,8 +84,20 @@ public class AESMatrix {
         return out;
     }
 
+    public String toLineString() {
+		return HexFormat.of().formatHex(matrix);
+	}
+
     byte get(int n) {// package visibility
 		return matrix[n];
+	}
+
+	public void writeToDisk(FileOutputStream stream) throws IOException {
+		stream.write(matrix);
+	}
+
+	public void writeToDisk(FileOutputStream stream, int n) throws IOException {
+		stream.write(matrix, 0, n);
 	}
 
     /*

@@ -63,7 +63,9 @@ public class IO {
 	public static void unloadIO(HashMap<String, Object> io) {
 		try {
 			((FileInputStream) io.get("input")).close();
-			((FileOutputStream) io.get("output")).close();
+			if(io.get("output") != null) {
+				((FileOutputStream) io.get("output")).close();
+			}
 		} catch(Exception e) {
 			System.out.println("Error: Exception " + e + " caught");
 			System.exit(-1);
@@ -71,16 +73,16 @@ public class IO {
 
 	};
 
-	public static boolean allZeroes(byte[] block) {
-		byte pad = block[15];
+	public static boolean allZeroes(AESMatrix matrix) {
+		byte pad = matrix.get(15);
 		int i = 0;
 
-		if(pad <16 && pad > 1) {
+		if(pad < 16 && pad > 1) {
 			i = 16 - pad;
 		}
 
 		for(; i < 15; ++i) {
-			if(block[i] != 0) {
+			if(matrix.get(i) != 0) {
 				return false;
 			}
 		}
@@ -99,11 +101,11 @@ public class IO {
 
 		if(read == 15) {
 			block[15] = 0x00;
-		} else if(read < 15) {
+		} else if(read < 15 && read > 0) {
 			for(int i = read; i < 15; ++i) {
 				block[i] = 0x00;
 			}
-			block[15] = (byte) read;
+			block[15] = (byte) (16 - read);
 		}
 
 		return read;
