@@ -18,7 +18,7 @@ $(ODIR):
 	mkdir $(ODIR)
 
 aes128: $(OBJF)
-	gcc -o $@ $^ $(LFLAGS)
+	$(CC) -o $@ $^ $(LFLAGS)
 
 $(ODIR)/%.o: $(SDIR)/%.c $(INCF)
 	$(CC) -c -o $@ $< $(CFLAGS)
