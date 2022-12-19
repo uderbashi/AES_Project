@@ -43,19 +43,21 @@ local AESMatrix = {
 	}
 }
 
+-- Creation and utility
+
 function AESMatrix:new()
-	new = {}
+	local new = {}
 	setmetatable(new, self)
 	self.__index = self
 	return new
 end
 
 function AESMatrix:__tostring()
-	out = "\n===============\n"
+	local out = "\n===============\n"
 	for i = 1, 4 do
 		out = out .. "| "
 		for j = 1, 4 do
-			out = out .. string.format("%02x ", self.matrix[j][i])
+			out = out .. string.format("%02x ", self.matrix[i][j])
 		end
 		out = out .. "|\n"
 	end
@@ -63,4 +65,87 @@ function AESMatrix:__tostring()
 	return out
 end
 
+function AESMatrix:from_bytes(bytes)
+	assert(#bytes == 16)
+	local i = 1
+	local j = 1
+	for char in string.gmatch(bytes, ".") do
+		self.matrix[i][j] = string.byte(char)
+		i = i + 1
+		if i > 4 then
+			i = 1
+			j = j + 1
+		end
+	end
+end
+
+function AESMatrix:to_bytes()
+	local out = ""
+	for j = 1, 4 do
+		for i = 1, 4 do
+			out = out .. string.char(self.matrix[i][j])
+		end
+	end
+	return out
+end
+
+function AESMatrix:get(n)
+	local i = n % 4
+	if i == 0 then i = 4 end
+	local j = math.ceil(n / 4)
+	return self.matrix[i][j]
+end
+
+
+-- Sub Bytes
+
+function AESMatrix.sub_byte_arr_with(arr, sub_box)
+	for k, v in ipairs(arr) do
+		arr[k] = sub_box[v+1]
+	end
+end
+
+function AESMatrix.sub_byte_arr(arr)
+	AESMatrix.sub_byte_arr_with(arr, AESMatrix.SBOX)
+end
+
+function AESMatrix.rsub_byte_arr(arr)
+	AESMatrix.sub_byte_arr_with(arr, AESMatrix.RSBOX)
+end
+
+function AESMatrix:sub_bytes()
+	for i = 1, 4 do
+		AESMatrix.sub_byte_arr(self.matrix[i])
+	end
+end
+
+function AESMatrix.rsub_bytes()
+	for i = 1, 4 do
+		AESMatrix.rsub_byte_arr(self.matrix[i])
+	end
+end
+
+-- XOR and round keys
+
+function AESMatrix:xor_matrix(matrix)
+	assert(#matrix == 4)
+	for i = 1, 4 do assert(#matrix[i] == 4) end
+
+	for i = 1, 4 do
+		for j = 1, 4 do
+			self.matrix[i][j] = self.matrix[i][j] ~ matrix[i][j]
+		end
+	end
+end
+
+function AESMatrix:xor_aes_matrix(aes_matrix)
+	self:xor_matrix(aes_matrix.matrix)
+end
+
+function AESMatrix:add_round_key(round_key)
+	self:xor_aes_matrix(round_key)
+end
+
+
+-- Return statment
 return AESMatrix
