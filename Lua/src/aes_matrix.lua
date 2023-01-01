@@ -125,6 +125,32 @@ function AESMatrix.rsub_bytes()
 	end
 end
 
+-- Shift Rows
+
+-- offset -3, -2, -1, 1, 2, 3
+function AESMatrix:shift_row(row, offset)
+	local temp_row = {}
+	local pos = offset > 0 and offset or 4 + offset
+	-- copies the latter part of the row to the 1st position,
+	-- and the early part of the row next
+	table.move(self.matrix[row], pos+1, 4, 1, temp_row)
+	table.move(self.matrix[row], 1, pos, 4-pos+1, temp_row)
+	self.matrix[row] = temp_row
+end
+
+function AESMatrix:shift_rows()
+	self:shift_row(2, 1)
+	self:shift_row(3, 2)
+	self:shift_row(4, 3)
+end
+
+function AESMatrix:rshift_rows()
+	self:shift_row(2, -1)
+	self:shift_row(3, -2)
+	self:shift_row(4, -3)
+end
+
+
 -- XOR and round keys
 
 function AESMatrix:xor_matrix(matrix)
