@@ -46,7 +46,14 @@ local AESMatrix = {
 -- Creation and utility
 
 function AESMatrix:new()
-	local new = {}
+	local new = {
+		matrix = { -- reinit matrix to make it as distinct object
+			{0,0,0,0},
+			{0,0,0,0},
+			{0,0,0,0},
+			{0,0,0,0}
+		}
+	}
 	setmetatable(new, self)
 	self.__index = self
 	return new
@@ -148,6 +155,67 @@ function AESMatrix:rshift_rows()
 	self:shift_row(2, -1)
 	self:shift_row(3, -2)
 	self:shift_row(4, -3)
+end
+
+-- Mix columns (The Design of Rijndael - Sec 4.1)
+function xtime(n)
+	if n & 0x80 ~= 0x00 then -- so it won't overflow upon shift
+		return ((n << 1) ~ 0x1B) & 0xFF -- added the &0xFF to limit it to 8bit
+	end
+	return n << 1
+end
+
+function AESMatrix.mix_column(col)
+	local t = col[1] ~ col[2] ~ col[3] ~ col[4]
+
+	local new_col = {}
+	new_col[1] = col[1] ~ t ~ xtime(col[1] ~ col[2])
+	new_col[2] = col[2] ~ t ~ xtime(col[2] ~ col[3])
+	new_col[3] = col[3] ~ t ~ xtime(col[3] ~ col[4])
+	new_col[4] = col[4] ~ t ~ xtime(col[4] ~ col[1])
+
+	return new_col
+end
+
+function AESMatrix.rmix_column(col)
+	local u = xtime(xtime(col[1] ~ col[3]))
+	local v = xtime(xtime(col[2] ~ col[4]))
+
+	local new_col = {}
+	new_col[1] = col[1] ~ u
+	new_col[2] = col[2] ~ v
+	new_col[3] = col[3] ~ u
+	new_col[4] = col[4] ~ v
+
+	return new_col
+end
+
+function AESMatrix:mix_columns()
+	for i = 1, 4 do
+		local col = {}
+		for j = 1, 4 do
+			col[j] = self.matrix[j][i]
+			print(string.format("%02x ", col[j]))
+		end
+		col = self.mix_column(col)
+		for j = 1, 4 do
+			self.matrix[j][i] = col[j]
+		end
+	end
+end
+
+function AESMatrix:rmix_columns()
+	for i = 1, 4 do
+		local col = {}
+		for j = 1, 4 do
+			col[j] = self.matrix[j][i]
+		end
+		col = self.rmix_column(col)
+		col = self.mix_column(col)
+		for j = 1, 4 do
+			self.matrix[j][i] = col[j]
+		end
+	end
 end
 
 
