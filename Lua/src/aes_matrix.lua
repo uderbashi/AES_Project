@@ -103,6 +103,13 @@ function AESMatrix:get(n)
 	return self.matrix[i][j]
 end
 
+function AESMatrix:set(n, val)
+	local i = n % 4
+	if i == 0 then i = 4 end
+	local j = math.ceil(n / 4)
+	self.matrix[i][j] = val
+end
+
 
 -- Sub Bytes
 
