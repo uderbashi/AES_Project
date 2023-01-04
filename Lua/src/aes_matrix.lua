@@ -113,18 +113,18 @@ end
 
 -- Sub Bytes
 
-function AESMatrix.sub_byte_arr_with(arr, sub_box)
+local function sub_byte_arr_with(arr, sub_box)
 	for k, v in ipairs(arr) do
 		arr[k] = sub_box[v+1]
 	end
 end
 
 function AESMatrix.sub_byte_arr(arr)
-	AESMatrix.sub_byte_arr_with(arr, AESMatrix.SBOX)
+	sub_byte_arr_with(arr, AESMatrix.SBOX)
 end
 
 function AESMatrix.rsub_byte_arr(arr)
-	AESMatrix.sub_byte_arr_with(arr, AESMatrix.RSBOX)
+	sub_byte_arr_with(arr, AESMatrix.RSBOX)
 end
 
 function AESMatrix:sub_bytes()
@@ -133,7 +133,7 @@ function AESMatrix:sub_bytes()
 	end
 end
 
-function AESMatrix.rsub_bytes()
+function AESMatrix:rsub_bytes()
 	for i = 1, 4 do
 		AESMatrix.rsub_byte_arr(self.matrix[i])
 	end
@@ -165,14 +165,14 @@ function AESMatrix:rshift_rows()
 end
 
 -- Mix columns (The Design of Rijndael - Sec 4.1)
-function xtime(n)
+local function xtime(n)
 	if n & 0x80 ~= 0x00 then -- so it won't overflow upon shift
 		return ((n << 1) ~ 0x1B) & 0xFF -- added the &0xFF to limit it to 8bit
 	end
 	return n << 1
 end
 
-function AESMatrix.mix_column(col)
+local function mix_column(col)
 	local t = col[1] ~ col[2] ~ col[3] ~ col[4]
 
 	local new_col = {}
@@ -184,7 +184,7 @@ function AESMatrix.mix_column(col)
 	return new_col
 end
 
-function AESMatrix.rmix_column(col)
+local function rmix_column(col)
 	local u = xtime(xtime(col[1] ~ col[3]))
 	local v = xtime(xtime(col[2] ~ col[4]))
 
@@ -202,9 +202,8 @@ function AESMatrix:mix_columns()
 		local col = {}
 		for j = 1, 4 do
 			col[j] = self.matrix[j][i]
-			print(string.format("%02x ", col[j]))
 		end
-		col = self.mix_column(col)
+		col = mix_column(col)
 		for j = 1, 4 do
 			self.matrix[j][i] = col[j]
 		end
@@ -217,8 +216,8 @@ function AESMatrix:rmix_columns()
 		for j = 1, 4 do
 			col[j] = self.matrix[j][i]
 		end
-		col = self.rmix_column(col)
-		col = self.mix_column(col)
+		col = rmix_column(col)
+		col = mix_column(col)
 		for j = 1, 4 do
 			self.matrix[j][i] = col[j]
 		end

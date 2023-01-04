@@ -1,4 +1,4 @@
-AESMatrix = require("src/aes_matrix")
+local AESMatrix = require("src/aes_matrix")
 
 AESKeys = {
 	keys = {},
