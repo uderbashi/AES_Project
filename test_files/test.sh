@@ -2,14 +2,19 @@
 
 # If number of arguments less then 1; print usage and exit
 if [ $# -lt 1 ]; then
-	echo "Usage: $0 <tested_application>"
+	echo "Usage: $0 <tested_application> <optional: path>"
 	exit 1
 fi
 
 # Setting the testing environment
-exe="$1" #tested application from args
 tst="diff" #testing application
-test_files=(./*.test) # all test files have the extension of .test
+test_dir=$( cd -- "$( dirname -- "$0" )" &> /dev/null && pwd ) #in subterminal go to the directory of the scipt and get its path
+-exe="$1" #tested application from args
+if [ $# -eq 2 ]
+then
+	cd $2
+fi
+test_files=(${test_dir}/*.test) # all test files have the extension of .test
 success=0
 fail=0
 
@@ -21,8 +26,8 @@ for file in "${test_files[@]}"; do
 	echo "Testing $file"
 
 	# encrypt and decrypt the file
-	$exe -e -i $file -o $file_enc -f cipher128
-	$exe -d -i $file_enc -o $file_dec -f cipher128
+	$exe -e -i $file -o $file_enc -f ${test_dir}/cipher128
+	$exe -d -i $file_enc -o $file_dec -f ${test_dir}/cipher128
 
 	$exe -h -i $file
 	$exe -h -i $file_dec
@@ -49,6 +54,6 @@ echo Fail: $fail
 echo ========================================
 
 # Clean up
-rm *.tmp
+rm ${test_dir}/*.tmp
 
 exit 0
