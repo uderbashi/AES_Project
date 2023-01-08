@@ -66,7 +66,7 @@ local function decrypt(aes_io)
 		decrypt_matrix(matrix, aes_io.io.keys)
 
 		-- dealing with padding hell sarts here
-		if i == blocks - 1 and matrix.get(16) == 0x00 then
+		if i == blocks - 1 and matrix:get(16) == 0x00 then
 			zero_flag = true
 			aes_io.io.output:write(matrix:to_bytes():sub(1,15))
 
@@ -74,13 +74,13 @@ local function decrypt(aes_io)
 			aes_io.io.output:write(matrix:to_bytes())
 
 		elseif aes_io.check_pad(matrix) then -- if pad detected
-			if matrix.get(16) == 0x11 then
+			if matrix:get(16) == 0x11 then
 				if not zero_flag then
 					aes_io.io.output:write(matrix:to_bytes())
 				end -- if the flag was up we would discard the pad
 			else
 				if zero_flag then aes_io.io.output:write(string.char(0x00)) end
-				aes_io.io.output:write(matrix:to_bytes():sub(1, 16 - matrix.get(16)))
+				aes_io.io.output:write(matrix:to_bytes():sub(1, 16 - matrix:get(16)))
 			end
 
 		else
@@ -109,10 +109,11 @@ local function hash(aes_io)
 			bytes, len = aes_io.read_block()
 		end
 	end
-	print(result:to_bytes():gsub(".", function(c)
-		return string.format("%2x", c:byte())
-	end))
 
+	local out = result:to_bytes():gsub(".", function(c)
+		return string.format("%02x", c:byte())
+	end)
+	print(out)
 end
 
 -- return statement

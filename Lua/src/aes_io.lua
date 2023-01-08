@@ -9,7 +9,7 @@ local function load_io(args)
 		-- temp is pi in hex
 		local temp = {0x31, 0x41, 0x59, 0x26, 0x53, 0x58, 0x97, 0x93, 0x23, 0x84, 0x62, 0x64, 0x33, 0x83, 0x27, 0x95}
 		key = ""
-		for hex in temp do
+		for _, hex in ipairs(temp) do
 			key = key .. string.char(hex)
 		end
 	else
@@ -41,12 +41,13 @@ local function check_pad(matrix)
 	local start = 0
 
 	if pad > 1 and pad < 16 then
-		start = 15 - pad
+		start = 17 - pad
 	elseif pad == 17 then
 		start = 1
 	else
 		return false
 	end
+
 	for i = start, 15 do
 		if matrix:get(i) ~= 0 then return false end
 	end

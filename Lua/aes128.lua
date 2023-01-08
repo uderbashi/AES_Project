@@ -1,5 +1,5 @@
 #!/usr/bin/env lua
-function main ()
+local function main ()
 	local aes = require("src/aes")
 	local aes_io = require("src/aes_io")
 	local args = require("src/args")

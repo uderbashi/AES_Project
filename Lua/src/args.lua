@@ -48,12 +48,14 @@ local function validate_args()
 	elseif opt == 5 then ARGS["h"] = nil; ARGS.act = "h"
 	else print_err("One OPERATION-OPTION should be chosen") end
 
-	opt = 1 -- key will be a multiple of 2, and file-key 3
-	opt = opt * (ARGS["k"] and 2 or 1)
-	opt = opt * (ARGS["f"] and 3 or 1)
-	if opt == 2 then ARGS.key = "k"
-	elseif opt == 3 then ARGS.key = "f"
-	else print_err("One KEY-OPTION should be assinged") end
+	if ARGS.act ~= "h" then
+		opt = 1 -- key will be a multiple of 2, and file-key 3
+		opt = opt * (ARGS["k"] and 2 or 1)
+		opt = opt * (ARGS["f"] and 3 or 1)
+		if opt == 2 then ARGS.key = "k"
+		elseif opt == 3 then ARGS.key = "f"
+		else print_err("One KEY-OPTION should be assinged") end
+	end
 
 	if not ARGS["i"] then print_err("Input Missing") end
 
