@@ -1,2 +1,4 @@
 AES_Project.geany
 Python3/src/__pycache__/
+Rust/target
+Rust/Cargo.lock
