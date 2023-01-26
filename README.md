@@ -10,3 +10,4 @@ The following are the languages and the compiler/interpreter versions I used to 
 | Python	| Python 3.9.2			|
 | Java		| openjdk 17.0.4		|
 | Lua		| Lua 5.4.2 			|
+| Rust		| rustc 1.63.0 (2021)	|

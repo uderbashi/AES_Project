@@ -4,7 +4,7 @@ local function print_help()
 	local out = [[
 usage: ./aes128 [-?] OPERATION-OPTION KEY-OPTION KEY IO-OPTIONS
 
-This is a 128-bit AES encryptor, decryptor, and hasher implemented in Java.
+This is a 128-bit AES encryptor, decryptor, and hasher implemented in Lua.
 This is a part of the AES-Project I created aimed to test the waters with programming languages I want to try, but didn't have any excuse to do so.
 
 optional arguments:
