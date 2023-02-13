@@ -128,6 +128,55 @@ impl AESMatrix {
 			self.matrix[i].rotate_right(i)
 		}
 	}
+
+	// mix columns (The Design of Rijndael - Sec 4.1)
+	fn mix_column(&mut self, col: usize) {
+		let t: u8 = self.matrix[0][col] ^ self.matrix[1][col] ^ self.matrix[2][col] ^ self.matrix[3][col];
+		let u: u8 = self.matrix[0][col];
+		self.matrix[0][col] ^= t ^ xtime(self.matrix[0][col] ^ self.matrix[1][col]);
+		self.matrix[1][col] ^= t ^ xtime(self.matrix[1][col] ^ self.matrix[2][col]);
+		self.matrix[2][col] ^= t ^ xtime(self.matrix[2][col] ^ self.matrix[3][col]);
+		self.matrix[3][col] ^= t ^ xtime(self.matrix[3][col] ^ u);
+	}
+
+	fn rmix_column(&mut self, col: usize) {
+		let u: u8 = xtime(xtime(self.matrix[0][col] ^ self.matrix[2][col]));
+		let v: u8 = xtime(xtime(self.matrix[1][col] ^ self.matrix[3][col]));
+		self.matrix[0][col] = self.matrix[0][col] ^ u;
+		self.matrix[1][col] = self.matrix[1][col] ^ v;
+		self.matrix[2][col] = self.matrix[2][col] ^ u;
+		self.matrix[3][col] = self.matrix[3][col] ^ v;
+	}
+
+	pub fn mix_columns(&mut self) {
+		for i in 0..4 {
+			self.mix_column(i);
+		}
+	}
+
+	pub fn rmix_columns(&mut self) {
+		for i in 0..4 {
+			self.rmix_column(i);
+			self.mix_column(i);
+		}
+	}
+
+	//xor matrix and round key
+	fn _xor_matrix(&mut self, matrix: [[u8; 4]; 4]) {
+		for i in 0..4 {
+			for j in 0..4 {
+				self.matrix[i][j] ^= matrix[i][j];
+			}
+		}
+	}
+
+	pub fn xor_matrix(&mut self, other: AESMatrix) {
+		self._xor_matrix(other.matrix);
+	}
+
+	pub fn add_round_key(&mut self, round_key: AESMatrix) {
+		self.xor_matrix(round_key);
+	}
 }
 
 
@@ -144,4 +193,12 @@ pub fn sub_bytes(arr: &mut [u8]) {
 
 pub fn rsub_bytes(arr: &mut [u8]) {
 	_sub_bytes(arr, RSBOX);
+}
+
+fn xtime(n: u8) -> u8 {
+	if n & 0x80 != 0 {
+		(n << 1) ^ 0x1B
+	} else {
+		n << 1
+	}
 }
