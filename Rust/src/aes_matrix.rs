@@ -75,6 +75,7 @@ impl std::ops::IndexMut<usize> for AESMatrix {
 }
 
 impl AESMatrix {
+	// utility functions
 	pub fn new() -> Self {
 		AESMatrix{
 			matrix: [[0; 4]; 4]
@@ -102,4 +103,34 @@ impl AESMatrix {
 		out
 	}
 
+	// sub bytes
+	pub fn sub_bytes(&mut self) {
+		for i in 0..4 {
+			sub_bytes(&mut self.matrix[i])
+		}
+	}
+
+	pub fn rsub_bytes(&mut self) {
+		for i in 0..4 {
+			rsub_bytes(&mut self.matrix[i])
+		}
+	}
+
+	// shift rows
+}
+
+
+// generic sub bytes to be used on arrays
+fn _sub_bytes(arr: &mut [u8], sub_box: [u8; 256]) {
+	for i in 0..arr.len() {
+		arr[i] = sub_box[arr[i] as usize];
+	}
+}
+
+pub fn sub_bytes(arr: &mut [u8]) {
+	_sub_bytes(arr, SBOX);
+}
+
+pub fn rsub_bytes(arr: &mut [u8]) {
+	_sub_bytes(arr, RSBOX);
 }
