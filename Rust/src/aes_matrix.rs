@@ -117,6 +117,17 @@ impl AESMatrix {
 	}
 
 	// shift rows
+	pub fn shift_rows(&mut self) {
+		for i in 1..4 {
+			self.matrix[i].rotate_left(i)
+		}
+	}
+
+	pub fn rshift_rows(&mut self) {
+		for i in 1..4 {
+			self.matrix[i].rotate_right(i)
+		}
+	}
 }
 
 
